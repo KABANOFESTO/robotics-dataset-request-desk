@@ -233,6 +233,23 @@ def test_bad_episode_cannot_be_assigned(operator_client, dataset_request, bad_ep
     assert response.status_code == 400
 
 
+def test_delivered_request_cannot_receive_new_assignment(
+    operator_client,
+    dataset_request,
+    episode,
+):
+    dataset_request.status = RequestStatus.DELIVERED
+    dataset_request.save(update_fields=["status"])
+
+    response = post_json(
+        operator_client,
+        reverse("dataset-request-assign", args=[dataset_request.id]),
+        {"episode": episode.id},
+    )
+
+    assert response.status_code == 400
+
+
 def test_episode_cannot_be_assigned_to_two_requests(
     operator_client,
     dataset_request,

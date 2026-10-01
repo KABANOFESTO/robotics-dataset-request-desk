@@ -146,6 +146,13 @@ class Assignment(models.Model):
 
     def clean(self):
         # Role authorization belongs in the API/service layer where the actor is known.
+        if self.request_id and self.request.status in {
+            RequestStatus.DELIVERED,
+            RequestStatus.ACCEPTED,
+        }:
+            raise ValidationError(
+                {"request": "Delivered requests cannot receive new episodes."}
+            )
         if self.episode_id and self.episode.quality == EpisodeQuality.BAD:
             raise ValidationError(
                 {"episode": "Bad-quality episodes cannot be assigned."}
