@@ -112,6 +112,8 @@ class DatasetRequest(models.Model):
         )
         self.status = request.status
         self.updated_at = request.updated_at
+        if hasattr(self, "_prefetched_objects_cache"):
+            self._prefetched_objects_cache.pop("status_history", None)
         return self
 
     def __str__(self):

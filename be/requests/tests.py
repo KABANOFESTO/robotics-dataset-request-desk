@@ -160,6 +160,13 @@ def test_client_can_accept_delivered_request(
 
     assert response.status_code == 200
     assert response.json()["status"] == RequestStatus.ACCEPTED
+    assert [item["to_status"] for item in response.json()["status_history"]] == [
+        RequestStatus.DELIVERED,
+        RequestStatus.ACCEPTED,
+    ]
+    assert response.json()["status_history"][-1]["changed_by_email"] == (
+        dataset_request.client.email
+    )
     assert list(
         RequestStatusHistory.objects.filter(request=dataset_request).values_list(
             "to_status", flat=True
