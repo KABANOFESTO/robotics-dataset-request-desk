@@ -1,6 +1,39 @@
 # Dataset Request Desk frontend
 
-Next.js App Router frontend for the Django REST API. This commit establishes the frontend structure; screens and authentication are intentionally scaffolded for incremental implementation.
+The frontend uses Next.js App Router and TypeScript. The structure groups route entry points under `src/app`, project workflows under `src/features`, and shared code under `src/lib` and `src/components`.
+
+## Folder map
+
+```text
+fe/
+├── src/
+│   ├── app/                         # URL routes and shared page layouts
+│   │   ├── (app)/                   # Authenticated application routes
+│   │   │   ├── admin/users/         # Optional admin user management
+│   │   │   └── requests/
+│   │   │       ├── [id]/            # Request details and workflow history
+│   │   │       └── new/             # Client request creation
+│   │   ├── login/                   # Public sign-in route
+│   │   ├── globals.css              # Global styles
+│   │   ├── layout.tsx               # Root HTML layout and metadata
+│   │   └── page.tsx                  # Redirects the root URL to requests
+│   ├── components/ui/                # Shared presentational primitives
+│   ├── features/
+│   │   ├── auth/                     # Login, logout, and session actions
+│   │   ├── episodes/                 # Episode search and assignment
+│   │   └── requests/                 # Request queries, validation, and actions
+│   ├── lib/
+│   │   ├── api.ts                    # Shared Django API fetch/error handling
+│   │   ├── session.ts                # Server-side session cookie access
+│   │   └── types.ts                  # Types matching backend serializers
+│   └── proxy.ts                      # Redirects unauthenticated app routes
+├── public/                           # Static assets
+├── next.config.ts                    # Next.js configuration (standalone output)
+├── package.json                      # Scripts and dependencies
+└── tsconfig.json                     # TypeScript configuration and @/* alias
+```
+
+Route groups such as `(app)` organize layouts without adding the group name to the URL. The `proxy.ts` convention is used because this project runs Next.js 16; its former `middleware.ts` name is deprecated. The proxy's cookie check is only a navigation convenience. Django remains responsible for authentication and role authorization on every API request.
 
 ## Development
 
@@ -9,15 +42,8 @@ npm ci
 npm run dev
 ```
 
-The frontend runs at `http://localhost:3000`. Set `API_BASE_URL` to the backend API root (defaults to `http://localhost:8000/api`).
+The frontend runs at `http://localhost:3000`. Set `API_BASE_URL` to the backend API root; it defaults to `http://localhost:8000/api`.
 
-## Production container
+## Current implementation stage
 
-Build from this directory with `docker build -t dataset-request-desk-frontend .`. Next.js is configured for standalone output. The session cookie and API authentication flow are scaffolds and must be completed before the UI can be used end to end.
-
-## Planned implementation sequence
-
-1. Authentication: JWT exchange, HTTP-only session cookies, session reading, and login/logout.
-2. Requests: client list/create, operator list, detail/history, and legal status actions.
-3. Episodes: operator filters and request assignment.
-4. Admin users (optional): create, deactivate, and change roles.
+This is the frontend foundation, not a finished UI. Page files and feature modules mark the implementation boundaries. The next steps are authentication and secure cookie handling, client/operator request workflows, episode assignment, and optional admin user management.
