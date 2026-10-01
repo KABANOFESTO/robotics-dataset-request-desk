@@ -5,11 +5,13 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from accounts.views import UserViewSet
+from episodes.views import EpisodeViewSet
 from requests.views import DatasetRequestViewSet
 
 
 router = DefaultRouter()
 router.register("users", UserViewSet, basename="user")
+router.register("episodes", EpisodeViewSet, basename="episode")
 router.register("requests", DatasetRequestViewSet, basename="dataset-request")
 
 urlpatterns = [
