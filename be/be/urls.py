@@ -6,7 +6,7 @@ from rest_framework.routers import DefaultRouter
 
 from accounts.views import UserViewSet
 from episodes.views import EpisodeViewSet
-from requests.views import DatasetRequestViewSet
+from requests.views import AnalyticsView, DatasetRequestViewSet
 
 
 router = DefaultRouter()
@@ -17,5 +17,6 @@ router.register("requests", DatasetRequestViewSet, basename="dataset-request")
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/auth/", include("accounts.urls")),
+    path("api/analytics/", AnalyticsView.as_view({"get": "list"}), name="analytics"),
     path("api/", include(router.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
