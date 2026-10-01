@@ -1,36 +1,23 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dataset Request Desk frontend
 
-## Getting Started
+Next.js App Router frontend for the Django REST API. This commit establishes the frontend structure; screens and authentication are intentionally scaffolded for incremental implementation.
 
-First, run the development server:
+## Development
 
-```bash
+```sh
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The frontend runs at `http://localhost:3000`. Set `API_BASE_URL` to the backend API root (defaults to `http://localhost:8000/api`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production container
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Build from this directory with `docker build -t dataset-request-desk-frontend .`. Next.js is configured for standalone output. The session cookie and API authentication flow are scaffolds and must be completed before the UI can be used end to end.
 
-## Learn More
+## Planned implementation sequence
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Authentication: JWT exchange, HTTP-only session cookies, session reading, and login/logout.
+2. Requests: client list/create, operator list, detail/history, and legal status actions.
+3. Episodes: operator filters and request assignment.
+4. Admin users (optional): create, deactivate, and change roles.
