@@ -1,18 +1,22 @@
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.db import IntegrityError, transaction
 from rest_framework import decorators, exceptions, mixins, response, viewsets
 from rest_framework.permissions import IsAuthenticated
 
 from accounts.models import UserRole
 from accounts.permissions import IsClient, IsOperatorOrAdmin
 
-from .models import Assignment, DatasetRequest, RequestStatus
+from .models import DatasetRequest
+from .services import assign_episode, transition_request
 from .serializers import (
     AssignmentCreateSerializer,
     AssignmentSerializer,
     DatasetRequestSerializer,
     RequestStatusSerializer,
 )
+
+
+def validation_detail(error):
+    return error.message_dict if hasattr(error, "message_dict") else error.messages
 
 
 class DatasetRequestViewSet(
@@ -45,44 +49,29 @@ class DatasetRequestViewSet(
     def perform_create(self, serializer):
         serializer.save(client=self.request.user)
 
-    def _apply_transition(self, dataset_request, status, user):
-        try:
-            dataset_request.transition_to(status, changed_by=user)
-        except DjangoValidationError as exc:
-            raise exceptions.ValidationError(exc.message)
-
     @decorators.action(detail=True, methods=["post"])
     def transition(self, request, pk=None):
         dataset_request = self.get_object()
         serializer = RequestStatusSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         status = serializer.validated_data["status"]
-        if status not in (RequestStatus.IN_PROGRESS, RequestStatus.DELIVERED):
-            raise exceptions.ValidationError(
-                {"status": "Operators can only start or deliver requests."}
-            )
-
-        self._apply_transition(dataset_request, status, request.user)
+        try:
+            transition_request(dataset_request, status, actor=request.user)
+        except DjangoValidationError as exc:
+            raise exceptions.ValidationError(validation_detail(exc))
 
         return response.Response(self.get_serializer(dataset_request).data)
 
     @decorators.action(detail=True, methods=["post"])
     def review(self, request, pk=None):
         dataset_request = self.get_object()
-        if dataset_request.client_id != request.user.id:
-            raise exceptions.PermissionDenied(
-                "Only the request owner can review a delivery."
-            )
-
         serializer = RequestStatusSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         status = serializer.validated_data["status"]
-        if status not in (RequestStatus.ACCEPTED, RequestStatus.REJECTED):
-            raise exceptions.ValidationError(
-                {"status": "Review status must be accepted or rejected."}
-            )
-
-        self._apply_transition(dataset_request, status, request.user)
+        try:
+            transition_request(dataset_request, status, actor=request.user)
+        except DjangoValidationError as exc:
+            raise exceptions.ValidationError(validation_detail(exc))
 
         return response.Response(self.get_serializer(dataset_request).data)
 
@@ -93,18 +82,13 @@ class DatasetRequestViewSet(
         serializer.is_valid(raise_exception=True)
 
         try:
-            with transaction.atomic():
-                assignment = Assignment.objects.create(
-                    request=dataset_request,
-                    episode=serializer.validated_data["episode"],
-                    assigned_by=request.user,
-                )
-        except DjangoValidationError as exc:
-            raise exceptions.ValidationError(exc.message_dict)
-        except IntegrityError:
-            raise exceptions.ValidationError(
-                {"episode": "This episode is already assigned."}
+            assignment = assign_episode(
+                dataset_request,
+                serializer.validated_data["episode"],
+                actor=request.user,
             )
+        except DjangoValidationError as exc:
+            raise exceptions.ValidationError(validation_detail(exc))
 
         return response.Response(
             AssignmentSerializer(assignment).data,
