@@ -22,7 +22,8 @@ class DatasetRequestViewSet(
     viewsets.GenericViewSet,
 ):
     queryset = DatasetRequest.objects.select_related("client").prefetch_related(
-        "assignments__episode"
+        "assignments__episode",
+        "status_history__changed_by",
     )
     serializer_class = DatasetRequestSerializer
 
