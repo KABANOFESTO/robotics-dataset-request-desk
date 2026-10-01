@@ -67,8 +67,18 @@ class DatasetRequest(models.Model):
         ]
         constraints: ClassVar[list[models.BaseConstraint]] = [
             models.CheckConstraint(
+                condition=~models.Q(task_name=""),
+                name="request_task_name_not_blank",
+            ),
+            models.CheckConstraint(
                 condition=models.Q(episodes_requested__gte=1),
                 name="request_episodes_requested_positive",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    status__in=[status.value for status in RequestStatus]
+                ),
+                name="request_status_valid",
             ),
         ]
 
@@ -175,6 +185,19 @@ class RequestStatusHistory(models.Model):
 
     class Meta:
         ordering: ClassVar[list[str]] = ["changed_at"]
+        constraints: ClassVar[list[models.BaseConstraint]] = [
+            models.CheckConstraint(
+                condition=models.Q(
+                    to_status__in=[status.value for status in RequestStatus]
+                ),
+                name="history_to_status_valid",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(from_status="")
+                | models.Q(from_status__in=[status.value for status in RequestStatus]),
+                name="history_from_status_valid",
+            ),
+        ]
 
     def __str__(self):
         return f"Request #{self.request_id}: {self.from_status} → {self.to_status}"
