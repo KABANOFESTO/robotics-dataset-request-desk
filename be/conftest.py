@@ -1,5 +1,6 @@
 import pytest
 from datetime import date
+from django.test import Client
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import User, UserRole
@@ -33,25 +34,26 @@ def admin_user(db):
     )
 
 
-def authenticated_client(client, user):
+def authenticated_client(user):
+    client = Client()
     token = RefreshToken.for_user(user).access_token
     client.defaults["HTTP_AUTHORIZATION"] = f"Bearer {token}"
     return client
 
 
 @pytest.fixture
-def auth_client(client, user):
-    return authenticated_client(client, user)
+def auth_client(user):
+    return authenticated_client(user)
 
 
 @pytest.fixture
-def operator_client(client, operator_user):
-    return authenticated_client(client, operator_user)
+def operator_client(operator_user):
+    return authenticated_client(operator_user)
 
 
 @pytest.fixture
-def admin_client(client, admin_user):
-    return authenticated_client(client, admin_user)
+def admin_client(admin_user):
+    return authenticated_client(admin_user)
 
 
 @pytest.fixture
