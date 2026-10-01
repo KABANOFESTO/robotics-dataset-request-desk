@@ -22,3 +22,7 @@ class IsAdmin(HasRole):
 
 class IsOperatorOrAdmin(HasRole):
     allowed_roles = (UserRole.OPERATOR, UserRole.ADMIN)
+
+
+class IsClient(HasRole):
+    allowed_roles = (UserRole.CLIENT,)

@@ -1,7 +1,10 @@
 import pytest
+from datetime import date
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import User, UserRole
+from episodes.models import Episode, EpisodeQuality
+from requests.models import DatasetRequest
 
 
 @pytest.fixture
@@ -49,3 +52,37 @@ def operator_client(client, operator_user):
 @pytest.fixture
 def admin_client(client, admin_user):
     return authenticated_client(client, admin_user)
+
+
+@pytest.fixture
+def episode(db):
+    return Episode.objects.create(
+        episode_id="EP-001",
+        robot_id="arm-01",
+        task_name="pick cup",
+        recorded_at="2026-09-01T10:00:00Z",
+        duration_seconds=30,
+        quality=EpisodeQuality.GOOD,
+    )
+
+
+@pytest.fixture
+def bad_episode(db):
+    return Episode.objects.create(
+        episode_id="EP-002",
+        robot_id="arm-01",
+        task_name="pick cup",
+        recorded_at="2026-09-01T10:00:00Z",
+        duration_seconds=30,
+        quality=EpisodeQuality.BAD,
+    )
+
+
+@pytest.fixture
+def dataset_request(db, user):
+    return DatasetRequest.objects.create(
+        client=user,
+        task_name="pick cup",
+        episodes_requested=1,
+        deadline=date(2026, 10, 31),
+    )
