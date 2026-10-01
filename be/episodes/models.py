@@ -61,6 +61,30 @@ class Episode(models.Model):
                 name="episode_robot_date_idx",
             ),
         ]
+        constraints: ClassVar[list[models.BaseConstraint]] = [
+            models.CheckConstraint(
+                condition=~models.Q(episode_id=""),
+                name="episode_id_not_blank",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(robot_id=""),
+                name="episode_robot_id_not_blank",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(task_name=""),
+                name="episode_task_name_not_blank",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(duration_seconds__gte=1),
+                name="episode_duration_positive",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(
+                    quality__in=[quality.value for quality in EpisodeQuality]
+                ),
+                name="episode_quality_valid",
+            ),
+        ]
 
     def __str__(self):
         return self.episode_id
