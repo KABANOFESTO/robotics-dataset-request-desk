@@ -44,19 +44,24 @@ class DatasetRequestViewSet(
     def perform_create(self, serializer):
         serializer.save(client=self.request.user)
 
+    def _apply_transition(self, dataset_request, status, user):
+        try:
+            dataset_request.transition_to(status, changed_by=user)
+        except DjangoValidationError as exc:
+            raise exceptions.ValidationError(exc.message)
+
     @decorators.action(detail=True, methods=["post"])
     def transition(self, request, pk=None):
         dataset_request = self.get_object()
         serializer = RequestStatusSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        try:
-            dataset_request.transition_to(
-                serializer.validated_data["status"],
-                changed_by=request.user,
+        status = serializer.validated_data["status"]
+        if status not in (RequestStatus.IN_PROGRESS, RequestStatus.DELIVERED):
+            raise exceptions.ValidationError(
+                {"status": "Operators can only start or deliver requests."}
             )
-        except DjangoValidationError as exc:
-            raise exceptions.ValidationError(exc.message)
+
+        self._apply_transition(dataset_request, status, request.user)
 
         return response.Response(self.get_serializer(dataset_request).data)
 
@@ -76,10 +81,7 @@ class DatasetRequestViewSet(
                 {"status": "Review status must be accepted or rejected."}
             )
 
-        try:
-            dataset_request.transition_to(status, changed_by=request.user)
-        except DjangoValidationError as exc:
-            raise exceptions.ValidationError(exc.message)
+        self._apply_transition(dataset_request, status, request.user)
 
         return response.Response(self.get_serializer(dataset_request).data)
 
