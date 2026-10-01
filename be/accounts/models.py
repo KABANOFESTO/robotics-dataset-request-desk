@@ -3,6 +3,8 @@ from typing import ClassVar
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from .managers import UserManager
+
 
 class UserRole(models.TextChoices):
     CLIENT = "client", "Client"
@@ -12,6 +14,7 @@ class UserRole(models.TextChoices):
 
 class User(AbstractUser):
     username = None
+    objects = UserManager()
     email = models.EmailField(unique=True)
     role = models.CharField(
         max_length=20,
