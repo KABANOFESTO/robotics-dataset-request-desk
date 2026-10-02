@@ -1,26 +1,433 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --font-sans: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+
+* {
+
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+.hamburger {
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  transition: all 0.25s;
+  position: relative;
+}
+
+.hamburger-top,
+.hamburger-middle,
+.hamburger-bottom {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 24px;
+  height: 2px;
+  background: #000;
+  transform: rotate(0);
+  transition: all 0.5s;
+}
+
+.hamburger-middle {
+  transform: translateY(7px);
+}
+
+.hamburger-bottom {
+  transform: translateY(14px);
+}
+
+.open {
+  transform: rotate(90deg);
+  transform: translateY(0px);
+}
+
+.open .hamburger-top {
+  transform: rotate(45deg) translateY(6px) translate(6px);
+}
+
+.open .hamburger-middle {
+  display: none;
+}
+
+.open .hamburger-bottom {
+  transform: rotate(-45deg) translateY(6px) translate(-6px);
+}
+
+@layer base {
+  :root {
+
+    --background: 0 0% 100%;
+
+    --foreground: 0 0% 3.9%;
+
+    --card: 0 0% 100%;
+
+    --card-foreground: 0 0% 3.9%;
+
+    --popover: 0 0% 100%;
+
+    --popover-foreground: 0 0% 3.9%;
+
+    --primary: 0 0% 9%;
+
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 96.1%;
+
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 96.1%;
+
+    --muted-foreground: 0 0% 45.1%;
+
+    --accent: 0 0% 96.1%;
+
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 84.2% 60.2%;
+
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 89.8%;
+
+    --input: 0 0% 89.8%;
+
+    --ring: 0 0% 3.9%;
+
+    --chart-1: 12 76% 61%;
+
+    --chart-2: 173 58% 39%;
+
+    --chart-3: 197 37% 24%;
+
+    --chart-4: 43 74% 66%;
+
+    --chart-5: 27 87% 67%;
+
+    --radius: 0.5rem;
+
+  }
+
+  .dark {
+
+    --background: 0 0% 3.9%;
+
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 3.9%;
+
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 3.9%;
+
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 0% 98%;
+
+    --primary-foreground: 0 0% 9%;
+
+    --secondary: 0 0% 14.9%;
+
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 14.9%;
+
+    --muted-foreground: 0 0% 63.9%;
+
+    --accent: 0 0% 14.9%;
+
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 14.9%;
+
+    --input: 0 0% 14.9%;
+
+    --ring: 0 0% 83.1%;
+
+    --chart-1: 220 70% 50%;
+
+    --chart-2: 160 60% 45%;
+
+    --chart-3: 30 80% 55%;
+
+    --chart-4: 280 65% 60%;
+
+    --chart-5: 340 75% 55%;
+
+  }
+
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+
+  }
+
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+.hero-glow-blue {
+  animation: hero-glow-drift 13s ease-in-out infinite alternate;
+}
+
+.hero-glow-amber {
+  animation: hero-glow-drift 16s ease-in-out infinite alternate-reverse;
+}
+
+.hero-signal {
+  animation: hero-signal-float 7s ease-in-out infinite;
+}
+
+.hero-signal-two {
+  animation-delay: -2.4s;
+}
+
+.hero-signal-three {
+  animation-delay: -4.8s;
+}
+
+.workflow-orbit {
+  animation: workflow-orbit 48s linear infinite;
+}
+
+.workflow-step {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.workflow-section[data-motion-ready="true"] .workflow-step {
+  opacity: 0;
+  transform: translateY(22px) scale(0.985);
+}
+
+.workflow-section[data-motion-ready="true"][data-visible="true"] .workflow-step {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@keyframes workflow-orbit {
+  from {
+    transform: translateX(-50%) rotate(0deg);
+  }
+
+  to {
+    transform: translateX(-50%) rotate(360deg);
+  }
+}
+
+@keyframes hero-signal-float {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate3d(0, -18px, 0);
+  }
+}
+
+@keyframes hero-glow-drift {
+  from {
+    translate: -12px -8px;
+  }
+
+  to {
+    translate: 18px 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+html[data-theme="dark"] .landing-page {
+  background-color: #050505;
+  color: #f4f4f5;
+}
+
+html[data-theme="dark"] .landing-navbar {
+  border-color: rgb(255 255 255 / 12%);
+  background-color: rgb(0 0 0 / 88%);
+}
+
+html[data-theme="dark"] .landing-navbar .brand-mark {
+  background-color: #f4f4f5;
+  color: #09090b;
+}
+
+html[data-theme="dark"] .landing-navbar .navbar-brand-name,
+html[data-theme="dark"] .landing-navbar .navbar-link {
+  color: #e4e4e7;
+}
+
+html[data-theme="dark"] .landing-navbar .theme-toggle {
+  border-color: #3f3f46;
+  background-color: #18181b;
+  color: #f4f4f5;
+}
+
+html[data-theme="dark"] .landing-navbar .theme-toggle:hover {
+  background-color: #27272a;
+}
+
+html[data-theme="dark"] .landing-navbar .theme-sun {
+  display: none;
+}
+
+html[data-theme="dark"] .landing-navbar .theme-moon {
+  display: block;
+}
+
+html[data-theme="dark"] .landing-navbar .landing-sign-in {
+  background-color: #f4f4f5;
+  color: #09090b;
+}
+
+html[data-theme="dark"] .landing-navbar .landing-sign-in:hover {
+  background-color: #d4d4d8;
+}
+
+html[data-theme="dark"] .landing-page #workflow {
+  border-color: #27272a;
+  background-color: #09090b;
+}
+
+html[data-theme="dark"] .landing-page #workflow h2,
+html[data-theme="dark"] .landing-page #workflow h3 {
+  color: #f4f4f5;
+}
+
+html[data-theme="dark"] .landing-page #workflow p {
+  color: #a1a1aa;
+}
+
+html[data-theme="dark"] .landing-page #workflow .workflow-step {
+  border-color: #27272a;
+  background-color: #111113;
+}
+
+html[data-theme="dark"] .landing-page #workflow .workflow-step .size-16 {
+  border-color: #3f3f46;
+  background-color: #18181b;
+  color: #e4e4e7;
+  box-shadow: 0 0 0 8px rgb(9 9 11 / 90%);
+}
+
+html[data-theme="dark"] .landing-page #workflow .workflow-step .size-9 {
+  background-color: #27272a;
+  color: #d4d4d8;
+}
+
+html[data-theme="dark"] .landing-page footer {
+  color: #a1a1aa;
+}
+
+html[data-theme="dark"] .landing-page footer .text-slate-900,
+html[data-theme="dark"] .landing-page footer a {
+  color: #e4e4e7;
+}
+
+html[data-theme="dark"] .landing-page footer a:hover {
+  color: #fff;
+}
+
+html[data-theme="dark"] .theme-sun {
+  display: none;
+}
+
+html[data-theme="dark"] .theme-moon {
+  display: block;
+}
+
+html[data-theme="dark"] .login-card {
+  border-color: rgb(255 255 255 / 14%);
+  background-color: rgb(9 9 11 / 94%);
+}
+
+html[data-theme="dark"] .login-card h1,
+html[data-theme="dark"] .login-card .login-brand-name,
+html[data-theme="dark"] .login-card label {
+  color: #f4f4f5;
+}
+
+html[data-theme="dark"] .login-card p,
+html[data-theme="dark"] .login-card a {
+  color: #a1a1aa;
+}
+
+html[data-theme="dark"] .login-card input {
+  border-color: #3f3f46;
+  background-color: #18181b;
+  color: #fafafa;
+}
+
+html[data-theme="dark"] .login-card input::placeholder {
+  color: #71717a;
+}
+
+html[data-theme="dark"] .login-card button[type="submit"] {
+  background-color: #f4f4f5;
+  color: #09090b;
+}
+
+html[data-theme="dark"] .login-card button[type="submit"]:hover {
+  background-color: #d4d4d8;
 }
