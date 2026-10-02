@@ -1,5 +1,5 @@
 import AnalyticsReport from "@/features/analytics/components/AnalyticsReport";
 
-export default function AdminReportPage() {
+export default function OperatorAnalyticsPage() {
   return <AnalyticsReport />;
 }

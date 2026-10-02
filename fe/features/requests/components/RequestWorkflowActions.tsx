@@ -3,10 +3,10 @@
 import { useMemo, useState } from "react";
 
 import { useGetEpisodesQuery } from "@/features/episodes/queries";
-import { useAssignEpisodeMutation, useTransitionRequestMutation } from "@/features/requests/actions";
+import { useAssignEpisodeMutation, useRemoveAssignmentMutation, useTransitionRequestMutation } from "@/features/requests/actions";
 import type { DatasetRequest } from "@/lib/types";
 
-export function AdminRequestActions({ request, enabled }: { request: DatasetRequest; enabled: boolean }) {
+export function RequestWorkflowActions({ request, enabled }: { request: DatasetRequest; enabled: boolean }) {
   const [selectedEpisode, setSelectedEpisode] = useState("");
   const [feedback, setFeedback] = useState<string | null>(null);
   const needsEpisodes = request.status === "in_progress" && request.assignments.length < request.episodes_requested;
@@ -15,6 +15,7 @@ export function AdminRequestActions({ request, enabled }: { request: DatasetRequ
   const eligibleEpisodes = useMemo(() => (episodesQuery.data ?? []).filter((episode) => episode.quality !== "bad"), [episodesQuery.data]);
   const [assignEpisode, assignmentState] = useAssignEpisodeMutation();
   const [transitionRequest, transitionState] = useTransitionRequestMutation();
+  const [removeAssignment, removalState] = useRemoveAssignmentMutation();
   const remaining = Math.max(0, request.episodes_requested - request.assignments.length);
 
   async function moveToInProgress() {
@@ -48,6 +49,17 @@ export function AdminRequestActions({ request, enabled }: { request: DatasetRequ
     }
   }
 
+  async function removeEpisode(assignmentId: number) {
+    if (!window.confirm("Remove this episode from the request? You can assign a replacement afterward.")) return;
+    setFeedback(null);
+    try {
+      await removeAssignment({ id: request.id, assignmentId }).unwrap();
+      setFeedback("Episode removed. Assign a suitable replacement before delivery.");
+    } catch {
+      setFeedback("The episode could not be removed. Refresh the request and try again.");
+    }
+  }
+
   if (request.status === "accepted") return <p className="text-xs font-medium text-emerald-700">Request complete</p>;
   if (request.status === "delivered") return <p className="text-xs text-slate-500">Waiting for the client to accept or request changes.</p>;
 
@@ -60,6 +72,7 @@ export function AdminRequestActions({ request, enabled }: { request: DatasetRequ
         </div>
       ) : (
         <>
+          {request.assignments.length > 0 && <ul className="space-y-2" aria-label="Assigned episodes">{request.assignments.map((assignment) => <li key={assignment.id} className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-xs"><span className="min-w-0 truncate font-medium text-slate-700">{assignment.episode_code} · {assignment.episode_quality}</span><button type="button" onClick={() => void removeEpisode(assignment.id)} disabled={removalState.isLoading} className="shrink-0 rounded-md px-2 py-1 font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-50" aria-label={`Remove episode ${assignment.episode_code}`}>Remove</button></li>)}</ul>}
           {remaining > 0 ? <>
             <p className="text-xs font-semibold text-slate-800">Assign {remaining} more {remaining === 1 ? "episode" : "episodes"} before delivery.</p>
             <div className="flex flex-col gap-2 sm:flex-row">
@@ -75,7 +88,7 @@ export function AdminRequestActions({ request, enabled }: { request: DatasetRequ
           {remaining === 0 && <button type="button" onClick={() => void markDelivered()} disabled={transitionState.isLoading} className="min-h-9 rounded-lg bg-teal-700 px-3 text-xs font-semibold text-white transition hover:bg-teal-800 disabled:opacity-50">{transitionState.isLoading ? "Updating…" : "Mark delivered"}</button>}
         </>
       )}
-      {feedback && <p role="status" className={`text-xs ${feedback.startsWith("Episode assigned") ? "text-emerald-700" : "text-rose-700"}`}>{feedback}</p>}
+      {feedback && <p role="status" className={`text-xs ${feedback.startsWith("Episode assigned") || feedback.startsWith("Episode removed") ? "text-emerald-700" : "text-rose-700"}`}>{feedback}</p>}
     </div>
   );
 }

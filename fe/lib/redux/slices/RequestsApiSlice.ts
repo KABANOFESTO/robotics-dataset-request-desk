@@ -20,6 +20,11 @@ export interface AssignEpisodePayload {
   episode: number;
 }
 
+export interface RemoveAssignmentPayload {
+  id: number;
+  assignmentId: number;
+}
+
 const requestsApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getRequests: builder.query<DatasetRequest[], void>({
@@ -71,6 +76,17 @@ const requestsApi = apiSlice.injectEndpoints({
         "Episode",
       ],
     }),
+    removeAssignment: builder.mutation<void, RemoveAssignmentPayload>({
+      query: ({ id, assignmentId }) => ({
+        url: `requests/${id}/assignments/${assignmentId}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (_result, _error, { id }) => [
+        { type: "Request", id },
+        { type: "Request", id: "LIST" },
+        "Episode",
+      ],
+    }),
   }),
 });
 
@@ -81,4 +97,5 @@ export const {
   useTransitionRequestMutation,
   useReviewRequestMutation,
   useAssignEpisodeMutation,
+  useRemoveAssignmentMutation,
 } = requestsApi;

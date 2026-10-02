@@ -5,8 +5,8 @@ import { useMemo, useState } from "react";
 import { useGetRequestsQuery } from "@/features/requests/queries";
 import type { DatasetRequest, RequestStatus } from "@/lib/types";
 
-import { AdminRequestActions } from "./AdminRequestActions";
-import { ADMIN_CARD, DataPagination, ErrorState, formatCount, formatDate, formatDateTime, LoadingState, MetricCard, PageHeading, StatusBadge } from "./AdminUi";
+import { RequestWorkflowActions } from "./RequestWorkflowActions";
+import { WORKSPACE_CARD, DataPagination, ErrorState, formatCount, formatDate, formatDateTime, LoadingState, MetricCard, PageHeading, StatusBadge } from "@/components/workspace/WorkspaceUi";
 
 const PAGE_SIZE = 15;
 const STATUSES: RequestStatus[] = ["submitted", "in_progress", "delivered", "accepted", "rejected"];
@@ -22,7 +22,7 @@ function RequestRecord({ request }: { request: DatasetRequest }) {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.5fr)_minmax(8rem,.75fr)_minmax(9rem,.8fr)_auto] lg:items-center">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2"><h3 className="truncate text-sm font-semibold text-slate-950">{request.task_name}</h3><span className="rounded-md bg-slate-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">#{request.id}</span></div>
-            <p className="mt-1 text-xs text-slate-500">Client #{request.client} · Created {formatDate(request.created_at)}</p>
+            <p className="mt-1 truncate text-xs text-slate-500" title={request.client_email}>{request.client_name} · {request.client_email} · Created {formatDate(request.created_at)}</p>
           </div>
           <div><p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Episode progress</p><p className="mt-1 text-sm font-semibold tabular-nums text-slate-800">{request.assignments.length} <span className="font-normal text-slate-400">/ {request.episodes_requested}</span></p><div className="mt-2 h-1.5 max-w-40 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-teal-700 to-cyan-500 transition-[width] duration-500" style={{ width: `${completion}%` }} /></div></div>
           <div className="flex items-center justify-between gap-3 sm:block"><div><p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">Deadline</p><p className="mt-1 text-sm font-medium text-slate-700">{formatDate(request.deadline)}</p></div><StatusBadge status={request.status} /></div>
@@ -39,7 +39,7 @@ function RequestRecord({ request }: { request: DatasetRequest }) {
               <section><h4 className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Client notes</h4><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-slate-700">{request.notes || "No notes were provided."}</p></section>
               <section><h4 className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Status history</h4>{request.status_history.length ? <ol className="mt-3 space-y-3 border-l border-slate-200 pl-3">{[...request.status_history].reverse().map((entry) => <li key={entry.id} className="relative text-xs"><span aria-hidden="true" className="absolute -left-[17px] top-1 size-2 rounded-full bg-teal-600 ring-2 ring-white" /><p className="font-semibold text-slate-800">{entry.from_status ? `${STATUS_LABELS[entry.from_status]} → ` : ""}{STATUS_LABELS[entry.to_status]}</p><p className="mt-0.5 text-slate-500">{entry.changed_by_email} · {formatDateTime(entry.changed_at)}</p></li>)}</ol> : <p className="mt-2 text-sm text-slate-500">No status changes recorded.</p>}</section>
             </div>
-            <section><h4 className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">Workflow</h4><AdminRequestActions request={request} enabled={expanded} /></section>
+            <section><h4 className="mb-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">Workflow</h4><RequestWorkflowActions request={request} enabled={expanded} /></section>
           </div>
         </details>
       </article>
@@ -47,7 +47,7 @@ function RequestRecord({ request }: { request: DatasetRequest }) {
   );
 }
 
-export default function AdminRequests() {
+export default function RequestsWorkspace() {
   const { data: requests = [], isLoading, isFetching, isError, refetch } = useGetRequestsQuery();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<"all" | RequestStatus>("all");
@@ -81,7 +81,7 @@ export default function AdminRequests() {
         <MetricCard label="Needs attention" value={isLoading || isError ? "—" : formatCount(statusCounts.submitted + statusCounts.rejected)} hint="New work or requested rework" icon={<span aria-hidden="true">!</span>} accent="amber" />
       </section>
 
-      <section className={`${ADMIN_CARD} overflow-hidden`}>
+      <section className={`${WORKSPACE_CARD} overflow-hidden`}>
         <div className="border-b border-slate-100 p-4 sm:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div><h2 className="text-base font-semibold text-slate-950">All client requests</h2><p className="mt-1 text-sm text-slate-500">{isLoading ? "Loading requests…" : `${formatCount(filteredRequests.length)} matching ${filteredRequests.length === 1 ? "request" : "requests"}`}</p></div>

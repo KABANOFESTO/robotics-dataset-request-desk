@@ -30,7 +30,7 @@ export function LoginForm() {
 
       try {
         const user = await getCurrentUser().unwrap();
-        router.replace(user.role === "admin" ? "/admin" : "/requests");
+        router.replace(user.role === "admin" ? "/admin" : user.role === "operator" ? "/operator" : "/requests");
       } catch {
         setErrorMessage("You signed in, but we couldn't load your account. Please try again.");
       }

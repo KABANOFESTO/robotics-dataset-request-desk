@@ -7,7 +7,7 @@ import { useGetUsersQuery } from "@/features/admin/queries";
 import { useAppSelector } from "@/lib/store";
 import type { UserRole } from "@/lib/types";
 
-import { PageHeading } from "./AdminUi";
+import { PageHeading } from "@/components/workspace/WorkspaceUi";
 
 const ROLE_LABELS: Record<UserRole, string> = {
   client: "Client",

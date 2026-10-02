@@ -1,5 +1,5 @@
-import AdminEpisodes from "@/features/admin/components/AdminEpisodes";
+import EpisodeLibrary from "@/features/episodes/components/EpisodeLibrary";
 
 export default function AdminEpisodesPage() {
-  return <AdminEpisodes />;
+  return <EpisodeLibrary />;
 }

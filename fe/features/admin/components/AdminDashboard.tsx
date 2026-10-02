@@ -8,7 +8,7 @@ import { useGetRequestsQuery } from "@/features/requests/queries";
 import { useGetUsersQuery } from "@/features/admin/queries";
 import type { DatasetRequest, RequestStatus } from "@/lib/types";
 
-import { ADMIN_CARD, ErrorState, formatCount, formatDate, MetricCard, PageHeading, StatusBadge } from "./AdminUi";
+import { WORKSPACE_CARD, ErrorState, formatCount, formatDate, MetricCard, PageHeading, StatusBadge } from "@/components/workspace/WorkspaceUi";
 
 const STATUSES: RequestStatus[] = ["submitted", "in_progress", "delivered", "accepted", "rejected"];
 const STATUS_LABELS: Record<RequestStatus, string> = {
@@ -120,7 +120,7 @@ export default function AdminDashboard() {
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-        <article className={`${ADMIN_CARD} p-5 sm:p-6`}>
+        <article className={`${WORKSPACE_CARD} p-5 sm:p-6`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div><h2 className="text-base font-semibold text-slate-950">Request pipeline</h2><p className="mt-1 text-sm text-slate-500">Live distribution across workflow stages</p></div>
             <Link href="/admin/requests" className="text-sm font-semibold text-teal-800 hover:text-teal-950">View all <span aria-hidden="true">→</span></Link>
@@ -144,7 +144,7 @@ export default function AdminDashboard() {
           </div>
         </article>
 
-        <article className={`${ADMIN_CARD} p-5 sm:p-6`}>
+        <article className={`${WORKSPACE_CARD} p-5 sm:p-6`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div><h2 className="text-base font-semibold text-slate-950">Episode collection</h2><p className="mt-1 text-sm text-slate-500">Recent recordings by day and robot</p></div>
             <label className="sr-only" htmlFor="dashboard-range">Analytics time period</label>
@@ -178,7 +178,7 @@ export default function AdminDashboard() {
         </article>
       </section>
 
-      <section className={`${ADMIN_CARD} p-5 sm:p-6`}>
+      <section className={`${WORKSPACE_CARD} p-5 sm:p-6`}>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between"><div><h2 className="text-base font-semibold text-slate-950">Recently submitted requests</h2><p className="mt-1 text-sm text-slate-500">Latest activity across the workspace</p></div><Link href="/admin/requests" className="text-sm font-semibold text-teal-800 hover:text-teal-950">Browse request desk →</Link></div>
         <div className="mt-5 space-y-2">
           {requestsQuery.isLoading ? <p className="rounded-xl bg-slate-50 p-5 text-sm text-slate-500" aria-live="polite">Loading recent requests…</p> : requestsQuery.isError ? <ErrorState message="Recent requests are unavailable." onRetry={() => void requestsQuery.refetch()} /> : latestRequests.length ? latestRequests.map((request) => <RequestPreview key={request.id} request={request} />) : <p className="rounded-xl bg-slate-50 p-5 text-sm text-slate-500">No requests have been submitted yet.</p>}

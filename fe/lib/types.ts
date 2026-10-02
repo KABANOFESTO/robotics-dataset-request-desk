@@ -30,6 +30,8 @@ export interface RequestStatusHistory {
 export interface RequestAssignment {
   id: number;
   episode: number;
+  episode_code: string;
+  episode_quality: EpisodeQuality;
   assigned_by: number;
   assigned_at: string;
 }
@@ -37,6 +39,8 @@ export interface RequestAssignment {
 export interface DatasetRequest {
   id: number;
   client: number;
+  client_email: string;
+  client_name: string;
   task_name: string;
   episodes_requested: number;
   deadline: string;
