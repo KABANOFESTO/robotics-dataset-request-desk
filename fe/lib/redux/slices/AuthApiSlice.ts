@@ -42,7 +42,6 @@ const authApi = apiSlice.injectEndpoints({
       async onQueryStarted(_credentials, { dispatch, queryFulfilled }) {
         try {
           const { data } = await queryFulfilled;
-          dispatch(apiSlice.util.resetApiState());
           dispatch(setCredentials(data));
           persistTokens(data);
         } catch {
@@ -72,12 +71,12 @@ const authApi = apiSlice.injectEndpoints({
         body: { token },
       }),
     }),
-    logout: builder.mutation<void, void>({
+    logout: builder.mutation<null, void>({
       async queryFn(_arg, { dispatch }) {
         dispatch(clearSession());
         dispatch(apiSlice.util.resetApiState());
         discardTokens();
-        return { data: undefined };
+        return { data: null };
       },
       invalidatesTags: ["Auth", "Request", "Episode"],
     }),
