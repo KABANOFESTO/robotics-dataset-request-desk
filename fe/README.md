@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dataset Request Desk frontend
 
-## Getting Started
+The frontend uses Next.js App Router and TypeScript. Routes live directly in `app/`; no `src/` directory is needed. Project workflows are grouped under `features/`, with shared code in `lib/` and `components/`.
 
-First, run the development server:
+## Folder map
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+fe/
+├── app/                         # Routes, layouts, and global styles
+│   ├── (app)/                   # Authenticated application routes
+│   │   ├── admin/users/         # Optional admin user management
+│   │   └── requests/
+│   │       ├── [id]/            # Request details and workflow history
+│   │       └── new/             # Client request creation
+│   ├── login/                   # Public sign-in route
+│   ├── globals.css              # Global styles
+│   ├── layout.tsx               # Root HTML layout and metadata
+│   └── page.tsx                 # Redirects the root URL to requests
+├── components/ui/              # Shared presentational primitives
+├── features/
+│   ├── auth/                    # Login, logout, and session actions
+│   ├── episodes/                # Episode search and assignment
+│   └── requests/                # Request queries, validation, and actions
+├── lib/                         # Shared API/session helpers and domain types
+├── public/                      # Static assets
+├── proxy.ts                     # Redirects unauthenticated app routes
+├── next.config.ts               # Next.js configuration
+├── package.json                 # Scripts and dependencies
+└── tsconfig.json                # TypeScript configuration and @/* alias
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Route groups such as `(app)` organize layouts without adding the group name to the URL. The `proxy.ts` convention is used because this project runs Next.js 16; its former `middleware.ts` name is deprecated. The proxy's cookie check is only a navigation convenience. Django remains responsible for authentication and role authorization on every API request.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sh
+npm ci
+npm run dev
+```
 
-## Learn More
+The frontend runs at `http://localhost:3000`. Set `API_BASE_URL` to the backend API root; it defaults to `http://localhost:8000/api`.
 
-To learn more about Next.js, take a look at the following resources:
+## Current implementation stage
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This is the frontend foundation, not a finished UI. Page files and feature modules mark the implementation boundaries. The next steps are authentication and secure cookie handling, client/operator request workflows, episode assignment, and optional admin user management.

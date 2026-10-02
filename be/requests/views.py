@@ -5,6 +5,14 @@ from rest_framework.permissions import IsAuthenticated
 from accounts.models import UserRole
 from accounts.permissions import IsClient, IsOperatorOrAdmin
 
+from .analytics import (
+    AnalyticsQuerySerializer,
+    date_bounds,
+    episodes_per_day,
+    median_submitted_to_delivered,
+    request_fulfillment,
+    top_good_tasks,
+)
 from .models import DatasetRequest
 from .services import assign_episode, transition_request
 from .serializers import (
@@ -93,4 +101,33 @@ class DatasetRequestViewSet(
         return response.Response(
             AssignmentSerializer(assignment).data,
             status=201,
+        )
+
+
+class AnalyticsView(viewsets.ViewSet):
+    permission_classes = (IsOperatorOrAdmin,)
+
+    def list(self, request):
+        serializer = AnalyticsQuerySerializer(data=request.query_params)
+        serializer.is_valid(raise_exception=True)
+        start, end = date_bounds(
+            serializer.validated_data["start_date"],
+            serializer.validated_data["end_date"],
+        )
+
+        return response.Response(
+            {
+                "date_range": {
+                    "start_date": serializer.validated_data["start_date"],
+                    "end_date": serializer.validated_data["end_date"],
+                },
+                "episodes_per_day_per_robot": episodes_per_day(start, end),
+                "request_fulfillment": {
+                    "by_status": request_fulfillment(start, end),
+                    "median_submitted_to_delivered_seconds": (
+                        median_submitted_to_delivered(start, end)
+                    ),
+                },
+                "top_good_tasks": top_good_tasks(start, end),
+            }
         )
