@@ -1,8 +1,5 @@
-export default function NewRequestPage() {
-  return (
-    <section>
-      <h1>New request</h1>
-      <p>Client request form will be implemented in the requests step.</p>
-    </section>
-  );
+import { redirect } from "next/navigation";
+
+export default function NewRequestAliasPage() {
+  redirect("/client/new-request");
 }

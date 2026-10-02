@@ -14,16 +14,13 @@ export interface ManagedUser {
 
 export interface CreateUserPayload {
   email: string;
-  password: string;
   first_name?: string;
   last_name?: string;
   role: UserRole;
   is_active?: boolean;
 }
 
-export type UpdateUserPayload = Partial<Omit<CreateUserPayload, "password">> & {
-  password?: string;
-};
+export type UpdateUserPayload = Partial<CreateUserPayload>;
 
 const usersApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({

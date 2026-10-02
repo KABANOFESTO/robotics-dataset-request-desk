@@ -19,7 +19,7 @@ export function RoleAccessGate({ children, role, deniedHref, label }: { children
       return;
     }
     if (currentUser && currentUser.role !== role) {
-      router.replace(currentUser.role === "admin" ? "/admin" : currentUser.role === "operator" ? "/operator" : deniedHref);
+      router.replace(currentUser.role === "admin" ? "/admin" : currentUser.role === "operator" ? "/operator" : currentUser.role === "client" ? "/client" : deniedHref);
     }
   }, [accessToken, currentUser, deniedHref, initialized, isError, isFetching, role, router]);
 

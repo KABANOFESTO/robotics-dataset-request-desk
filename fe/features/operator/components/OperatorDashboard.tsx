@@ -25,7 +25,7 @@ export default function OperatorDashboard() {
   const episodeCount = (analytics.data?.episodes_per_day_per_robot ?? []).reduce((total, row) => total + row.count, 0);
 
   return <div className="space-y-8 sm:space-y-10">
-    <PageHeading eyebrow="Operations" title="Operator dashboard" description="A live view of incoming work, active fulfillment, episode supply, and requests that need attention." action={<Link href="/operator/requests" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-teal-800">Open request desk <span aria-hidden="true" className="ml-2">→</span></Link>} />
+    <PageHeading eyebrow="Operations" title="" description="" action={<Link href="/operator/requests" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-teal-800">Open request desk <span aria-hidden="true" className="ml-2">→</span></Link>} />
     {isError ? <ErrorState message="Request data could not be loaded." onRetry={() => void refetch()} /> : isLoading ? <LoadingState label="Loading operations dashboard…" /> : <>
       <section aria-label="Operations summary" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard label="New requests" value={formatCount(counts.submitted)} hint="Submitted and ready to start" icon={<span aria-hidden="true">＋</span>} accent="blue" />

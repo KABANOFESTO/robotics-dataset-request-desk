@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useLogoutMutation } from "@/features/auth/actions";
 import { useAppSelector } from "@/lib/store";
 
-export type WorkspaceNavItem = { href: string; label: string; icon: "grid" | "inbox" | "layers" | "chart" | "users"; exact?: boolean };
+export type WorkspaceNavItem = { href: string; label: string; icon: "grid" | "inbox" | "layers" | "chart" | "users" | "plus"; exact?: boolean };
 
 type WorkspaceNavProps = { items: WorkspaceNavItem[]; subtitle: string; roleLabel: string; homeHref: string };
 
@@ -26,6 +26,7 @@ function NavIcon({ name }: { name: WorkspaceNavItem["icon"] }) {
     layers: <><path d="m12 3 9 5-9 5-9-5 9-5Z" /><path d="m3 12 9 5 9-5M3 16l9 5 9-5" /></>,
     chart: <><path d="M4 19V5M4 19h17" /><path d="m7 15 4-4 3 2 6-7" /><path d="M17 6h3v3" /></>,
     users: <><circle cx="9" cy="8" r="3" /><path d="M3 20v-1a6 6 0 0 1 12 0v1H3ZM16 5.5a3 3 0 0 1 0 5.8M18 14a5 5 0 0 1 3 4.6v1" /></>,
+    plus: <><path d="M12 5v14M5 12h14" /></>,
   };
 
   return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="size-[18px]">{paths[name]}</svg>;

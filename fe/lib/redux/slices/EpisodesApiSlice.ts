@@ -17,6 +17,10 @@ export interface EpisodeImportResult {
   issues_truncated: boolean;
 }
 
+export interface EpisodeTaskOptions {
+  tasks: string[];
+}
+
 const episodesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getEpisodes: builder.query<Episode[], EpisodeFilters | void>({
@@ -39,6 +43,10 @@ const episodesApi = apiSlice.injectEndpoints({
       query: (id) => `episodes/${id}/`,
       providesTags: (_episode, _error, id) => [{ type: "Episode", id }],
     }),
+    getEpisodeTasks: builder.query<EpisodeTaskOptions, void>({
+      query: () => "episodes/tasks/",
+      providesTags: [{ type: "Episode", id: "TASKS" }],
+    }),
     importEpisodes: builder.mutation<EpisodeImportResult, File>({
       query: (file) => {
         const body = new FormData();
@@ -50,4 +58,4 @@ const episodesApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetEpisodesQuery, useGetEpisodeQuery, useImportEpisodesMutation } = episodesApi;
+export const { useGetEpisodesQuery, useGetEpisodeQuery, useGetEpisodeTasksQuery, useImportEpisodesMutation } = episodesApi;

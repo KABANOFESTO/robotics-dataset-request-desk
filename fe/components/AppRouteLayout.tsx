@@ -8,7 +8,7 @@ export function AppRouteLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   // Staff subtrees render their own navigation and page shell.
-  if (pathname.startsWith("/admin") || pathname.startsWith("/operator")) return children;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/operator") || pathname.startsWith("/client")) return children;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
