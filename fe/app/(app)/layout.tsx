@@ -1,15 +1,5 @@
-import Link from "next/link";
+import { AppRouteLayout } from "@/components/AppRouteLayout";
 
 export default function AppLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <div>
-      <header>
-        <Link href="/requests">Dataset Request Desk</Link>
-        <nav aria-label="Main navigation">
-          <Link href="/requests">Requests</Link>
-        </nav>
-      </header>
-      <main>{children}</main>
-    </div>
-  );
+  return <AppRouteLayout>{children}</AppRouteLayout>;
 }

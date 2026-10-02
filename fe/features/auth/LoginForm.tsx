@@ -5,10 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { useLoginMutation } from "@/features/auth/actions";
+import { useLazyGetCurrentUserQuery } from "@/features/auth/queries";
+import { apiSlice } from "@/lib/redux/slices/ApiSlice";
+import { setCredentials } from "@/lib/redux/slices/AuthSlice";
+import { useAppDispatch } from "@/lib/store";
 
 export function LoginForm() {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [login, { isLoading }] = useLoginMutation();
+  const [getCurrentUser] = useLazyGetCurrentUserQuery();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -18,8 +24,16 @@ export function LoginForm() {
     setErrorMessage(null);
 
     try {
-      await login({ email: email.trim(), password }).unwrap();
-      router.replace("/requests");
+      dispatch(apiSlice.util.resetApiState());
+      const tokens = await login({ email: email.trim(), password }).unwrap();
+      dispatch(setCredentials(tokens));
+
+      try {
+        const user = await getCurrentUser().unwrap();
+        router.replace(user.role === "admin" ? "/admin" : "/requests");
+      } catch {
+        setErrorMessage("You signed in, but we couldn't load your account. Please try again.");
+      }
     } catch {
       setErrorMessage("We couldn't sign you in. Check your email and password, then try again.");
     }
