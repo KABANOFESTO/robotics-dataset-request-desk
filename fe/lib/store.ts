@@ -1,13 +1,24 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { apiSlice } from "@/lib/redux/silces/ApiSlice";
+import { useDispatch, useSelector, useStore } from "react-redux";
 
-export const store = configureStore({
+import authReducer from "@/lib/redux/slices/AuthSlice";
+import { apiSlice } from "@/lib/redux/slices/ApiSlice";
+
+export const makeStore = () =>
+  configureStore({
     reducer: {
-        [apiSlice.reducerPath]: apiSlice.reducer,
+      auth: authReducer,
+      [apiSlice.reducerPath]: apiSlice.reducer,
     },
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiSlice.middleware),
-    devTools: true,
-});
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(apiSlice.middleware),
+    devTools: process.env.NODE_ENV !== "production",
+  });
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+export type AppStore = ReturnType<typeof makeStore>;
+export type RootState = ReturnType<AppStore["getState"]>;
+export type AppDispatch = AppStore["dispatch"];
+
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
+export const useAppStore = useStore.withTypes<AppStore>();

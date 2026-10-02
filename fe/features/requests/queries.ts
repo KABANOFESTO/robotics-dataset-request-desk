@@ -1,4 +1,2 @@
-import type { DatasetRequest } from "@/lib/types";
-
-// Add API-backed request list and detail queries in the requests implementation step.
-export type RequestList = DatasetRequest[];
+export { useGetRequestQuery, useGetRequestsQuery } from "@/lib/redux/slices/RequestsApiSlice";
+export type { RequestList } from "@/lib/redux/slices/RequestsApiSlice";
