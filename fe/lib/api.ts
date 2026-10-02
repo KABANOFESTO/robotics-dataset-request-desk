@@ -1,5 +1,9 @@
-/** Shared API boundary for the Django REST backend. Feature-specific requests belong in feature modules. */
-const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8000/api";
+import "server-only";
+
+import { readSessionToken } from "@/lib/session";
+
+const API_ORIGIN = (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+const API_BASE_URL = `${API_ORIGIN}/api/`;
 
 export class ApiError extends Error {
   constructor(
@@ -12,19 +16,24 @@ export class ApiError extends Error {
   }
 }
 
+/** Server Component/API helper. Client Components should use the RTK Query feature hooks. */
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const token = await readSessionToken();
+  const normalizedPath = path.replace(/^\/+/, "");
+  const response = await fetch(`${API_BASE_URL}${normalizedPath}`, {
     ...init,
     headers: {
       Accept: "application/json",
       ...(init.body ? { "Content-Type": "application/json" } : {}),
+      ...(token ? { Authorization: `Bearer ${decodeURIComponent(token)}` } : {}),
       ...init.headers,
     },
-    // Cookie-based session forwarding will be added with the auth implementation.
-    credentials: "include",
+    cache: "no-store",
   });
 
-  const payload: unknown = response.status === 204 ? undefined : await response.json().catch(() => undefined);
+  const payload: unknown = response.status === 204
+    ? undefined
+    : await response.json().catch(() => undefined);
   if (!response.ok) {
     const message = typeof payload === "object" && payload !== null && "detail" in payload
       ? String(payload.detail)

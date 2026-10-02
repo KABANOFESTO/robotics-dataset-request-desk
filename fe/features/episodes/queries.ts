@@ -1,4 +1,2 @@
-import type { Episode } from "@/lib/types";
-
-// Add filtered episode queries in the assignment implementation step.
-export type EpisodeList = Episode[];
+export { useGetEpisodeQuery, useGetEpisodesQuery } from "@/lib/redux/slices/EpisodesApiSlice";
+export type { EpisodeFilters, EpisodeList } from "@/lib/redux/slices/EpisodesApiSlice";

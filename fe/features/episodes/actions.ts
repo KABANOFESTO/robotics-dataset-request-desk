@@ -1,2 +1,2 @@
-// Add episode assignment actions in the assignment implementation step.
-export {};
+export { useAssignEpisodeMutation } from "@/lib/redux/slices/RequestsApiSlice";
+export type { AssignEpisodePayload } from "@/lib/redux/slices/RequestsApiSlice";

@@ -12,7 +12,10 @@ export type EpisodeQuality = "good" | "usable" | "bad";
 export interface SessionUser {
   id: number;
   email: string;
+  first_name: string;
+  last_name: string;
   role: UserRole;
+  is_active: boolean;
 }
 
 export interface RequestStatusHistory {
