@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { useGetAnalyticsQuery } from "@/features/analytics/queries";
 import type { RequestStatus } from "@/lib/types";
 
-import { ADMIN_CARD, ErrorState, formatCount, formatDate, LoadingState, MetricCard, PageHeading, StatusBadge } from "./AdminUi";
+import { WORKSPACE_CARD, ErrorState, formatCount, formatDate, LoadingState, MetricCard, PageHeading, StatusBadge } from "@/components/workspace/WorkspaceUi";
 
 const STATUS_ORDER: RequestStatus[] = ["submitted", "in_progress", "delivered", "accepted", "rejected"];
 const STATUS_LABELS: Record<RequestStatus, string> = { submitted: "Submitted", in_progress: "In progress", delivered: "Delivered", accepted: "Accepted", rejected: "Rework requested" };
@@ -34,7 +34,7 @@ function csvCell(value: string | number) {
   return `"${String(value).replaceAll('"', '""')}"`;
 }
 
-export default function AdminReport() {
+export default function AnalyticsReport() {
   const [startDate, setStartDate] = useState(() => initialRange().start_date);
   const [endDate, setEndDate] = useState(() => initialRange().end_date);
   const validRange = startDate <= endDate;
@@ -83,7 +83,7 @@ export default function AdminReport() {
     <div className="space-y-8 sm:space-y-10">
       <PageHeading eyebrow="Insights" title="Workspace reports" description="Explore request fulfillment and episode collection over a date range, then export the current report." action={<button type="button" onClick={exportCsv} disabled={!data} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950 disabled:cursor-not-allowed disabled:opacity-40"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="size-4"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3h16v-3" /></svg>Export CSV</button>} />
 
-      <section className={`${ADMIN_CARD} p-4 sm:p-5`} aria-label="Report date range">
+      <section className={`${WORKSPACE_CARD} p-4 sm:p-5`} aria-label="Report date range">
         <div className="grid gap-4 sm:grid-cols-[1fr_auto_1fr_auto] sm:items-end">
           <div><label htmlFor="report-start" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">From</label><input id="report-start" type="date" value={startDate} max={endDate} onChange={(event) => setStartDate(event.target.value)} className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/10" /></div>
           <span aria-hidden="true" className="hidden pb-3 text-slate-400 sm:block">to</span>
@@ -106,7 +106,7 @@ export default function AdminReport() {
 
       {data && validRange && !isError && (
         <section className="grid gap-5 xl:grid-cols-2">
-          <article className={`${ADMIN_CARD} p-5 sm:p-6`}>
+          <article className={`${WORKSPACE_CARD} p-5 sm:p-6`}>
             <div><h2 className="text-base font-semibold text-slate-950">Daily episode collection</h2><p className="mt-1 text-sm text-slate-500">Episodes recorded per day for the selected range</p></div>
             {dailyTotals.length ? <div className="mt-6">
               <div className="flex h-60 items-end gap-1.5 overflow-x-auto border-b border-slate-200 pb-0.5 sm:gap-2" role="img" aria-label={`Bar chart of ${formatCount(totalEpisodes)} episodes recorded per day`}>
@@ -116,7 +116,7 @@ export default function AdminReport() {
             </div> : <div className="mt-6 rounded-xl bg-slate-50 p-6 text-center text-sm text-slate-500">No episodes were recorded in this date range.</div>}
           </article>
 
-          <article className={`${ADMIN_CARD} p-5 sm:p-6`}>
+          <article className={`${WORKSPACE_CARD} p-5 sm:p-6`}>
             <div><h2 className="text-base font-semibold text-slate-950">Request fulfillment</h2><p className="mt-1 text-sm text-slate-500">Workflow status for requests created during this period</p></div>
             <div className="mt-6 space-y-5">{STATUS_ORDER.map((status) => {
               const count = fulfillment.find((row) => row.status === status)?.count ?? 0;

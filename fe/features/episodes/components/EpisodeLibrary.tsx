@@ -3,9 +3,10 @@
 import { useMemo, useState } from "react";
 
 import { useGetEpisodesQuery } from "@/features/episodes/queries";
+import { useImportEpisodesMutation } from "@/features/episodes/actions";
 import type { EpisodeQuality } from "@/lib/types";
 
-import { ADMIN_CARD, DataPagination, ErrorState, formatCount, formatDateTime, formatDuration, LoadingState, MetricCard, PageHeading } from "./AdminUi";
+import { WORKSPACE_CARD, DataPagination, ErrorState, formatCount, formatDateTime, formatDuration, LoadingState, MetricCard, PageHeading } from "@/components/workspace/WorkspaceUi";
 
 const PAGE_SIZE = 20;
 const QUALITY_LABEL: Record<EpisodeQuality, string> = { good: "Good", usable: "Usable", bad: "Bad" };
@@ -19,14 +20,18 @@ function QualityBadge({ quality }: { quality: EpisodeQuality }) {
   return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${QUALITY_STYLE[quality]}`}>{QUALITY_LABEL[quality]}</span>;
 }
 
-export default function AdminEpisodes() {
+export default function EpisodeLibrary({ allowImport = false }: { allowImport?: boolean }) {
+  const [importEpisodes, importState] = useImportEpisodesMutation();
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importMessage, setImportMessage] = useState<string | null>(null);
+  const [taskName, setTaskName] = useState("");
   const [search, setSearch] = useState("");
   const [quality, setQuality] = useState<"all" | EpisodeQuality>("all");
   const [availability, setAvailability] = useState<"all" | "available" | "assigned">("all");
   const [pageState, setPageState] = useState({ key: "", page: 1 });
-  const filterKey = `${search.trim().toLowerCase()}|${quality}|${availability}`;
+  const filterKey = `${taskName.trim().toLowerCase()}|${search.trim().toLowerCase()}|${quality}|${availability}`;
   const page = pageState.key === filterKey ? pageState.page : 1;
-  const filters = useMemo(() => ({ available: availability === "available" ? true : undefined }), [availability]);
+  const filters = useMemo(() => ({ task_name: taskName.trim() || undefined, available: availability === "available" ? true : undefined }), [availability, taskName]);
   const { data: episodes = [], isLoading, isFetching, isError, refetch } = useGetEpisodesQuery(filters);
 
   const visibleEpisodes = useMemo(() => {
@@ -47,9 +52,35 @@ export default function AdminEpisodes() {
     return counts;
   }, { good: 0, usable: 0, bad: 0 }), [availability, episodes]);
 
+  async function submitImport(event: import("react").FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setImportMessage(null);
+    if (!importFile) return;
+    if (importFile.size > 10 * 1024 * 1024) {
+      setImportMessage("Choose a CSV file smaller than 10 MB.");
+      return;
+    }
+    try {
+      const result = await importEpisodes(importFile).unwrap();
+      setImportMessage(`Imported ${result.imported}; skipped ${result.skipped} duplicates; rejected ${result.invalid} invalid rows.${result.issues.length ? ` First issue: row ${result.issues[0].line}, ${result.issues[0].message}` : ""}${result.issues_truncated ? " Additional row issues were omitted." : ""}`);
+      setImportFile(null);
+      const input = document.getElementById("episode-csv-file") as HTMLInputElement | null;
+      if (input) input.value = "";
+    } catch (error) {
+      const detail = error && typeof error === "object" && "data" in error ? (error as { data?: { detail?: string } }).data?.detail : undefined;
+      setImportMessage(detail || "CSV import failed. Check the file format and try again.");
+    }
+  }
+
   return (
     <div className="space-y-8 sm:space-y-10">
       <PageHeading eyebrow="Collection" title="Episode library" description="Search and review imported recordings, quality ratings, and assignment availability." action={<span className="inline-flex min-h-10 items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600"><span className={`size-2 rounded-full ${isFetching ? "animate-pulse bg-amber-500" : "bg-emerald-500"}`} />{isFetching ? "Refreshing" : "Live data"}</span>} />
+
+      {allowImport && <form onSubmit={(event) => void submitImport(event)} className={`${WORKSPACE_CARD} flex flex-col gap-4 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5`}>
+        <div className="min-w-0"><label htmlFor="episode-csv-file" className="block text-sm font-semibold text-slate-900">Import episode CSV</label><p className="mt-1 text-xs leading-5 text-slate-500">Duplicates are skipped; invalid rows are reported. Maximum file size: 10 MB.</p><input id="episode-csv-file" type="file" accept=".csv,text/csv" onChange={(event) => setImportFile(event.target.files?.[0] ?? null)} className="mt-3 block w-full max-w-xl text-sm text-slate-600 file:mr-3 file:min-h-10 file:rounded-lg file:border-0 file:bg-slate-100 file:px-3 file:font-semibold file:text-slate-700" /></div>
+        <button type="submit" disabled={!importFile || importState.isLoading} className="min-h-11 shrink-0 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white transition hover:bg-teal-800 disabled:cursor-not-allowed disabled:opacity-50">{importState.isLoading ? "Importing…" : "Import CSV"}</button>
+        {importMessage && <p role="status" className="basis-full text-sm text-slate-700">{importMessage}</p>}
+      </form>}
 
       <section aria-label="Episode quality totals" className="grid gap-3 sm:grid-cols-3">
         <MetricCard label="Good quality" value={isLoading || isError ? "—" : formatCount(qualityCounts.good)} hint="Ready for request assignment" icon={<span aria-hidden="true">✓</span>} accent="teal" />
@@ -57,12 +88,13 @@ export default function AdminEpisodes() {
         <MetricCard label="Needs review" value={isLoading || isError ? "—" : formatCount(qualityCounts.bad)} hint="Bad-quality records excluded from assignment" icon={<span aria-hidden="true">!</span>} accent="violet" />
       </section>
 
-      <section className={`${ADMIN_CARD} overflow-hidden`}>
+      <section className={`${WORKSPACE_CARD} overflow-hidden`}>
         <div className="border-b border-slate-100 p-4 sm:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div><h2 className="text-base font-semibold text-slate-950">All episodes</h2><p className="mt-1 text-sm text-slate-500">{isLoading ? "Loading collection…" : `${formatCount(visibleEpisodes.length)} matching records`}</p></div>
-            <div className="grid gap-3 sm:grid-cols-2 lg:w-[min(100%,42rem)] lg:grid-cols-[minmax(14rem,1fr)_10rem_11rem]">
-              <div><label htmlFor="episode-search" className="sr-only">Search episodes</label><input id="episode-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search ID, task, robot or operator" className="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none placeholder:text-slate-400 focus:border-teal-700 focus:ring-2 focus:ring-teal-700/10" /></div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:w-[min(100%,52rem)] lg:grid-cols-[minmax(12rem,1fr)_minmax(10rem,.8fr)_10rem_11rem]">
+              <div><label htmlFor="episode-task" className="sr-only">Filter by task name</label><input id="episode-task" type="search" value={taskName} onChange={(event) => setTaskName(event.target.value)} placeholder="Filter task name" className="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none placeholder:text-slate-400 focus:border-teal-700 focus:ring-2 focus:ring-teal-700/10" /></div>
+              <div><label htmlFor="episode-search" className="sr-only">Search episodes</label><input id="episode-search" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search ID, robot or operator" className="min-h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none placeholder:text-slate-400 focus:border-teal-700 focus:ring-2 focus:ring-teal-700/10" /></div>
               <div><label htmlFor="episode-quality" className="sr-only">Filter by quality</label><select id="episode-quality" value={quality} onChange={(event) => setQuality(event.target.value as "all" | EpisodeQuality)} className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/10"><option value="all">All quality</option><option value="good">Good</option><option value="usable">Usable</option><option value="bad">Bad</option></select></div>
               <div><label htmlFor="episode-availability" className="sr-only">Filter by assignment</label><select id="episode-availability" value={availability} onChange={(event) => setAvailability(event.target.value as "all" | "available" | "assigned")} className="min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/10"><option value="all">All episodes</option><option value="available">Available</option><option value="assigned">Assigned</option></select></div>
             </div>

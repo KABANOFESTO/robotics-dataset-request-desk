@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import type { RequestStatus } from "@/lib/types";
 
-export const ADMIN_CARD = "rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-950/[0.03]";
+export const WORKSPACE_CARD = "rounded-2xl border border-slate-200/80 bg-white shadow-sm shadow-slate-950/[0.03]";
 
 const STATUS_META: Record<RequestStatus, { label: string; styles: string }> = {
   submitted: { label: "Submitted", styles: "bg-sky-50 text-sky-700 ring-sky-600/15" },
@@ -66,7 +66,7 @@ export function MetricCard({
   };
 
   return (
-    <article className={`${ADMIN_CARD} p-5 transition duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-6`}>
+    <article className={`${WORKSPACE_CARD} p-5 transition duration-200 hover:-translate-y-0.5 hover:shadow-md sm:p-6`}>
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-sm font-medium text-slate-600">{label}</p>
@@ -81,7 +81,7 @@ export function MetricCard({
 
 export function LoadingState({ label = "Loading workspace data…" }: { label?: string }) {
   return (
-    <div className={`${ADMIN_CARD} flex items-center gap-3 p-6 text-sm text-slate-600`} role="status" aria-live="polite">
+    <div className={`${WORKSPACE_CARD} flex items-center gap-3 p-6 text-sm text-slate-600`} role="status" aria-live="polite">
       <span className="size-5 animate-spin rounded-full border-2 border-slate-200 border-t-teal-700" aria-hidden="true" />
       {label}
     </div>

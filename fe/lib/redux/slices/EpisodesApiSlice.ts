@@ -9,6 +9,14 @@ export interface EpisodeFilters {
   available?: boolean;
 }
 
+export interface EpisodeImportResult {
+  imported: number;
+  skipped: number;
+  invalid: number;
+  issues: Array<{ line: number; category: "skipped" | "invalid"; message: string }>;
+  issues_truncated: boolean;
+}
+
 const episodesApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getEpisodes: builder.query<Episode[], EpisodeFilters | void>({
@@ -31,7 +39,15 @@ const episodesApi = apiSlice.injectEndpoints({
       query: (id) => `episodes/${id}/`,
       providesTags: (_episode, _error, id) => [{ type: "Episode", id }],
     }),
+    importEpisodes: builder.mutation<EpisodeImportResult, File>({
+      query: (file) => {
+        const body = new FormData();
+        body.append("file", file);
+        return { url: "episodes/import/", method: "POST", body };
+      },
+      invalidatesTags: [{ type: "Episode", id: "LIST" }, "Analytics"],
+    }),
   }),
 });
 
-export const { useGetEpisodesQuery, useGetEpisodeQuery } = episodesApi;
+export const { useGetEpisodesQuery, useGetEpisodeQuery, useImportEpisodesMutation } = episodesApi;

@@ -7,8 +7,8 @@ import type { ReactNode } from "react";
 export function AppRouteLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
-  // The admin subtree renders its own full navigation and page shell.
-  if (pathname.startsWith("/admin")) return children;
+  // Staff subtrees render their own navigation and page shell.
+  if (pathname.startsWith("/admin") || pathname.startsWith("/operator")) return children;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
