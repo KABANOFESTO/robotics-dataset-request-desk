@@ -14,7 +14,12 @@ from .analytics import (
     top_good_tasks,
 )
 from .models import DatasetRequest
-from .services import assign_episode, transition_request
+from .services import (
+    assign_available_episodes,
+    assign_episode,
+    remove_assignment,
+    transition_request,
+)
 from .serializers import (
     AssignmentCreateSerializer,
     AssignmentSerializer,
@@ -48,7 +53,12 @@ class DatasetRequestViewSet(
     def get_permissions(self):
         if self.action == "create":
             permission_classes = (IsClient,)
-        elif self.action in {"transition", "assign"}:
+        elif self.action in {
+            "transition",
+            "assign",
+            "assign_available",
+            "remove_assignment",
+        }:
             permission_classes = (IsOperatorOrAdmin,)
         else:
             permission_classes = (IsAuthenticated,)
@@ -102,6 +112,45 @@ class DatasetRequestViewSet(
             AssignmentSerializer(assignment).data,
             status=201,
         )
+
+    @decorators.action(
+        detail=True,
+        methods=["post"],
+        url_path="assign-available",
+        permission_classes=[IsOperatorOrAdmin],
+    )
+    def assign_available(self, request, pk=None):
+        dataset_request = self.get_object()
+        try:
+            assignments = assign_available_episodes(
+                dataset_request,
+                actor=request.user,
+            )
+        except DjangoValidationError as exc:
+            raise exceptions.ValidationError(validation_detail(exc))
+
+        return response.Response(
+            AssignmentSerializer(assignments, many=True).data,
+            status=201,
+        )
+
+    @decorators.action(
+        detail=True,
+        methods=["delete"],
+        url_path=r"assignments/(?P<assignment_id>[^/.]+)",
+    )
+    def remove_assignment(self, request, pk=None, assignment_id=None):
+        dataset_request = self.get_object()
+        try:
+            remove_assignment(
+                dataset_request,
+                assignment_id,
+                actor=request.user,
+            )
+        except DjangoValidationError as exc:
+            raise exceptions.ValidationError(validation_detail(exc))
+
+        return response.Response(status=204)
 
 
 class AnalyticsView(viewsets.ViewSet):
