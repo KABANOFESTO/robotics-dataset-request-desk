@@ -105,8 +105,8 @@ export default function AdminDashboard() {
     <div className="space-y-8 sm:space-y-10">
       <PageHeading
         eyebrow="Admin control room"
-        title="Workspace overview"
-        description="A live view of dataset requests, episode collection, and account activity."
+        title=""
+        description=""
         action={<Link href="/admin/requests" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-teal-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-950">Open request desk <span aria-hidden="true">↗</span></Link>}
       />
 

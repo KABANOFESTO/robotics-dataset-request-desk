@@ -76,6 +76,17 @@ const requestsApi = apiSlice.injectEndpoints({
         "Episode",
       ],
     }),
+    assignAvailableEpisodes: builder.mutation<DatasetRequest["assignments"], number>({
+      query: (id) => ({
+        url: `requests/${id}/assign-available/`,
+        method: "POST",
+      }),
+      invalidatesTags: (_assignments, _error, id) => [
+        { type: "Request", id },
+        { type: "Request", id: "LIST" },
+        "Episode",
+      ],
+    }),
     removeAssignment: builder.mutation<void, RemoveAssignmentPayload>({
       query: ({ id, assignmentId }) => ({
         url: `requests/${id}/assignments/${assignmentId}/`,
@@ -97,5 +108,6 @@ export const {
   useTransitionRequestMutation,
   useReviewRequestMutation,
   useAssignEpisodeMutation,
+  useAssignAvailableEpisodesMutation,
   useRemoveAssignmentMutation,
 } = requestsApi;

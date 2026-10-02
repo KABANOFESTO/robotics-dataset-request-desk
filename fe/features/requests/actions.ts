@@ -1,5 +1,6 @@
 export {
   useAssignEpisodeMutation,
+  useAssignAvailableEpisodesMutation,
   useCreateRequestMutation,
   useRemoveAssignmentMutation,
   useReviewRequestMutation,

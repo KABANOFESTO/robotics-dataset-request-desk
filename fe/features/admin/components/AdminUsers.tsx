@@ -62,17 +62,16 @@ export default function AdminUsers() {
     setFeedback(null);
 
     try {
-      await createUser({
+      const createdUser = await createUser({
         email: String(values.get("email")).trim(),
         first_name: String(values.get("first_name")).trim(),
         last_name: String(values.get("last_name")).trim(),
-        password: String(values.get("password")),
         role: String(values.get("role")) as UserRole,
         is_active: true,
       }).unwrap();
       form.reset();
       setShowCreateForm(false);
-      setFeedback({ kind: "success", message: "The account was created." });
+      setFeedback({ kind: "success", message: `Account created. A temporary password was sent to ${createdUser.email}.` });
     } catch (error) {
       setFeedback({ kind: "error", message: errorText(error) });
     }
@@ -114,7 +113,7 @@ export default function AdminUsers() {
         <section aria-labelledby="create-user-title" className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="mb-5">
             <h2 id="create-user-title" className="text-base font-semibold text-slate-950">Create an account</h2>
-            <p className="mt-1 text-sm text-slate-500">Share the temporary password with the user through your approved channel.</p>
+            <p className="mt-1 text-sm text-slate-500">A secure temporary password will be generated and sent to the new user’s email address.</p>
           </div>
           <form onSubmit={handleCreateUser} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <div>
@@ -128,10 +127,6 @@ export default function AdminUsers() {
             <div>
               <label htmlFor="user-last-name" className="mb-1.5 block text-sm font-medium text-slate-700">Last name</label>
               <input id="user-last-name" name="last_name" type="text" autoComplete="family-name" maxLength={150} className="min-h-11 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
-            </div>
-            <div>
-              <label htmlFor="user-password" className="mb-1.5 block text-sm font-medium text-slate-700">Temporary password</label>
-              <input id="user-password" name="password" type="password" autoComplete="new-password" required minLength={8} className="min-h-11 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-900/10" />
             </div>
             <div>
               <label htmlFor="user-role" className="mb-1.5 block text-sm font-medium text-slate-700">Role</label>
