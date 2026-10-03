@@ -6,6 +6,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils.crypto import get_random_string
 
 from accounts.models import User, UserRole
 
@@ -61,6 +62,7 @@ class Command(BaseCommand):
         seen_emails = set()
         created = 0
         skipped = 0
+        generated_credentials = []
 
         for index, item in enumerate(users, start=1):
             if not isinstance(item, dict):
@@ -71,9 +73,15 @@ class Command(BaseCommand):
             role = item.get("role")
             name = item.get("name", "").strip()
 
-            if not email or not password or role not in valid_roles:
+            if not email or role not in valid_roles:
                 raise CommandError(
-                    f"Entry {index} must have an email, password, and valid role."
+                    f"Entry {index} must have an email and valid role."
+                )
+            if password is not None and not isinstance(password, str):
+                raise CommandError(f"Entry {index} password must be a string.")
+            if not password and not settings.DEBUG:
+                raise CommandError(
+                    f"Entry {index} must have a password outside debug mode."
                 )
             if email in seen_emails:
                 raise CommandError(f"Duplicate email in seed file: {email}")
@@ -91,6 +99,10 @@ class Command(BaseCommand):
                 skipped += 1
                 continue
 
+            if not password:
+                password = get_random_string(32)
+                generated_credentials.append((email, password))
+
             first_name, _, last_name = name.partition(" ")
             User.objects.create_user(
                 email=email,
@@ -106,3 +118,12 @@ class Command(BaseCommand):
                 f"Seed complete: {created} user(s) created, {skipped} existing user(s) kept."
             )
         )
+        if generated_credentials:
+            self.stdout.write(
+                self.style.WARNING(
+                    "Generated local-only passwords. Save them now; they are not "
+                    "shown again and must not be used outside local development:"
+                )
+            )
+            for email, password in generated_credentials:
+                self.stdout.write(f"{email}: {password}")

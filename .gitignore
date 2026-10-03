@@ -1,1 +1,4 @@
 .DS_Store
+/seed/users.json
+/be/seed/users.json
+coverage.xml
