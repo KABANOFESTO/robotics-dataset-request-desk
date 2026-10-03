@@ -2,36 +2,57 @@ import json
 from pathlib import Path
 
 from django.conf import settings
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from accounts.models import User, UserRole
 
 
-DEFAULT_SEED_FILE = settings.BASE_DIR.parent / "seed" / "users.json"
+DEFAULT_SEED_FILE = settings.SEED_USERS_FILE
 
 
 class Command(BaseCommand):
-    help = "Create any missing development accounts from seed/users.json."
+    help = "Create missing accounts from the configured user seed data."
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--file",
             type=Path,
-            default=DEFAULT_SEED_FILE,
-            help="Path to a JSON array of users (defaults to the repository seed file).",
+            help="Path to a JSON array of users (defaults to SEED_USERS_FILE).",
         )
 
     @transaction.atomic
     def handle(self, *args, **options):
-        seed_file = options["file"]
-        if not seed_file.is_file():
-            raise CommandError(f"Seed file not found: {seed_file}")
+        seed_file = options["file"] or DEFAULT_SEED_FILE
+        seed_users_json = getattr(settings, "SEED_USERS_JSON", "")
+        if seed_users_json and options["file"] is None:
+            raw_users = seed_users_json
+            source = "SEED_USERS_JSON"
+        else:
+            if (
+                not seed_file.is_file()
+                and options["file"] is None
+                and settings.DEBUG
+            ):
+                example_file = seed_file.with_name("users.example.json")
+                if example_file.is_file():
+                    seed_file = example_file
+            if not seed_file.is_file():
+                raise CommandError(
+                    f"Seed file not found: {seed_file}. Set SEED_USERS_JSON or pass --file."
+                )
+            try:
+                raw_users = seed_file.read_text(encoding="utf-8")
+            except OSError as exc:
+                raise CommandError(f"Could not read seed file: {exc}") from exc
+            source = str(seed_file)
 
         try:
-            users = json.loads(seed_file.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            raise CommandError(f"Could not read seed file: {exc}") from exc
+            users = json.loads(raw_users)
+        except json.JSONDecodeError as exc:
+            raise CommandError(f"Seed data from {source} is not valid JSON: {exc}") from exc
 
         if not isinstance(users, list):
             raise CommandError("Seed file must contain a JSON array of users.")
@@ -57,6 +78,14 @@ class Command(BaseCommand):
             if email in seen_emails:
                 raise CommandError(f"Duplicate email in seed file: {email}")
             seen_emails.add(email)
+
+            if not settings.DEBUG:
+                try:
+                    validate_password(password, user=User(email=email))
+                except ValidationError as exc:
+                    raise CommandError(
+                        f"Entry {index} has a password that fails Django's password policy."
+                    ) from exc
 
             if User.objects.filter(email__iexact=email).exists():
                 skipped += 1
