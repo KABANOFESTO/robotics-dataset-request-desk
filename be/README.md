@@ -27,7 +27,7 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-`seed_users` reads the ignored `seed/users.json` when present, otherwise uses `seed/users.example.json` in debug mode. For passwordless local seed entries, it generates random passwords and prints them once at startup. Outside debug mode, every seed entry must provide a strong password through `SEED_USERS_JSON` or a private seed file. Existing accounts and passwords are never changed by reseeding. Use `python manage.py seed_users --help` to provide a different file. Never commit user passwords. Set `AUTO_SETUP_ON_RUNSERVER=true` only if you explicitly want `runserver` to repeat migration and seeding automatically.
+`seed_users` reads `seed/users.json` when present, otherwise uses `seed/users.example.json` in debug mode. It creates missing accounts and leaves existing passwords unchanged. Use `python manage.py seed_users --help` to provide a different file. Never put production credentials in source control. Set `AUTO_SETUP_ON_RUNSERVER=true` only if you explicitly want `runserver` to repeat migration and seeding automatically.
 
 ## Import episode data
 
