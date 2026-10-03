@@ -27,7 +27,17 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
-`seed_users` reads `seed/users.json` when present, otherwise uses `seed/users.example.json` in debug mode. It creates missing accounts and leaves existing passwords unchanged. Use `python manage.py seed_users --help` to provide a different file. Never put production credentials in source control. Set `AUTO_SETUP_ON_RUNSERVER=true` only if you explicitly want `runserver` to repeat migration and seeding automatically.
+`seed_users` reads `seed/users.json` when present, otherwise uses `seed/users.example.json` in debug mode. It creates missing accounts and leaves existing passwords unchanged. Use `python manage.py seed_users --help` to provide a different file. Never put production credentials in source control.
+
+To create configured review users as part of `python manage.py migrate`, set `AUTO_SEED_USERS=true`. Provide the user data through `SEED_USERS_JSON` or `SEED_USERS_FILE`. On Render, put these values in the backend service's environment settings; migrations run at startup before Gunicorn. The seeder is idempotent and does not change existing accounts or passwords. If a disposable review deployment must use the supplied weak demo passwords, set `SEED_USERS_ALLOW_WEAK_PASSWORDS=true` there only; keep it disabled for real user accounts.
+
+For Render, set the service root directory to `be`, use `pip install -r requirements.txt` as the build command, and use this start command so migrations (and optional seeding) happen before the web server starts:
+
+```sh
+python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn be.wsgi:application --bind 0.0.0.0:$PORT --workers 2
+```
+
+Set `AUTO_SEED_USERS=true` in Render. The committed seed file is used by default; use `SEED_USERS_FILE` or `SEED_USERS_JSON` for private credentials. The provided reviewer passwords are weak and publicly known, so only enable `SEED_USERS_ALLOW_WEAK_PASSWORDS=true` for a disposable demo deployment.
 
 ## Import episode data
 

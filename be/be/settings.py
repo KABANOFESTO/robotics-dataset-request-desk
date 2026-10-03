@@ -63,7 +63,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
-    "accounts",
+    "accounts.apps.AccountsConfig",
     "episodes",
     "requests.apps.RequestsConfig",
 ]
@@ -205,6 +205,10 @@ if FRONTEND_HOST:
     CORS_ALLOWED_ORIGINS.append(as_origin(FRONTEND_HOST))
 
 AUTO_SETUP_ON_RUNSERVER = env_bool("AUTO_SETUP_ON_RUNSERVER", False)
+AUTO_SEED_USERS = env_bool("AUTO_SEED_USERS", False)
+SEED_USERS_ALLOW_WEAK_PASSWORDS = env_bool(
+    "SEED_USERS_ALLOW_WEAK_PASSWORDS", False
+)
 SEED_USERS_FILE = Path(
     os.getenv("SEED_USERS_FILE", str(BASE_DIR / "seed" / "users.json"))
 )
