@@ -8,10 +8,8 @@ import {
 
 import { clearSession, setCredentials } from "@/lib/redux/slices/AuthSlice";
 
-const apiOrigin = (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
-
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: `${apiOrigin}/api/`,
+  baseUrl: "/api/",
   prepareHeaders: (headers, { getState }) => {
     const state = getState() as { auth?: { accessToken: string | null } };
     if (state.auth?.accessToken) {
@@ -21,12 +19,28 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
+function withTrailingSlash(args: string | FetchArgs): string | FetchArgs {
+  const normalize = (url: string) => {
+    const suffixIndex = url.search(/[?#]/);
+    const pathname = suffixIndex === -1 ? url : url.slice(0, suffixIndex);
+    const suffix = suffixIndex === -1 ? "" : url.slice(suffixIndex);
+
+    if (!pathname || pathname.endsWith("/")) return url;
+    return `${pathname}/${suffix}`;
+  };
+
+  return typeof args === "string" ? normalize(args) : { ...args, url: normalize(args.url) };
+}
+
+const slashSafeBaseQuery: typeof rawBaseQuery = (args, api, extraOptions) =>
+  rawBaseQuery(withTrailingSlash(args), api, extraOptions);
+
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  let result = await rawBaseQuery(args, api, extraOptions);
+  let result = await slashSafeBaseQuery(args, api, extraOptions);
   const state = api.getState() as {
     auth?: { accessToken: string | null; refreshToken: string | null };
   };
@@ -34,7 +48,7 @@ const baseQueryWithReauth: BaseQueryFn<
   const isAuthEndpoint = api.endpoint === "login" || api.endpoint === "refreshAccessToken";
 
   if (result.error?.status === 401 && refreshToken && !isAuthEndpoint) {
-    const refreshResult = await rawBaseQuery(
+    const refreshResult = await slashSafeBaseQuery(
       { url: "auth/token/refresh/", method: "POST", body: { refresh: refreshToken } },
       api,
       extraOptions,
@@ -47,7 +61,7 @@ const baseQueryWithReauth: BaseQueryFn<
         window.sessionStorage.setItem("access", refreshed.access);
         document.cookie = `dataset_session=${encodeURIComponent(refreshed.access)}; Path=/; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
       }
-      result = await rawBaseQuery(args, api, extraOptions);
+      result = await slashSafeBaseQuery(args, api, extraOptions);
     } else {
       api.dispatch(clearSession());
       api.dispatch(apiSlice.util.resetApiState());
