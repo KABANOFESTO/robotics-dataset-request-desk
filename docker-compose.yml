@@ -1,0 +1,70 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: dataset_request_desk
+      POSTGRES_USER: dataset_request_desk
+      POSTGRES_PASSWORD: local-docker-password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dataset_request_desk -d dataset_request_desk"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DJANGO_DEBUG: "true"
+      DJANGO_SECRET_KEY: local-docker-only-secret-key-change-before-deployment
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
+      DATABASE_URL: postgresql://dataset_request_desk:local-docker-password@db:5432/dataset_request_desk
+      AUTO_SEED_USERS: "true"
+      SEED_USERS_FILE: /app/seed/users.json
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      DJANGO_CSRF_TRUSTED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      FRONTEND_URL: http://localhost:3000
+    volumes:
+      - ./be/seed:/app/seed:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        ["CMD", "python", "-c", "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/healthz/', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        INTERNAL_API_URL: http://backend:8000
+    environment:
+      INTERNAL_API_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
