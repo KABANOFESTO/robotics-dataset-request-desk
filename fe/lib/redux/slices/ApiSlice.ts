@@ -19,21 +19,21 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-function withTrailingSlash(args: string | FetchArgs): string | FetchArgs {
+function withoutTrailingSlash(args: string | FetchArgs): string | FetchArgs {
   const normalize = (url: string) => {
     const suffixIndex = url.search(/[?#]/);
     const pathname = suffixIndex === -1 ? url : url.slice(0, suffixIndex);
     const suffix = suffixIndex === -1 ? "" : url.slice(suffixIndex);
 
-    if (!pathname || pathname.endsWith("/")) return url;
-    return `${pathname}/${suffix}`;
+    if (!pathname || !pathname.endsWith("/")) return url;
+    return `${pathname.slice(0, -1)}${suffix}`;
   };
 
   return typeof args === "string" ? normalize(args) : { ...args, url: normalize(args.url) };
 }
 
 const slashSafeBaseQuery: typeof rawBaseQuery = (args, api, extraOptions) =>
-  rawBaseQuery(withTrailingSlash(args), api, extraOptions);
+  rawBaseQuery(withoutTrailingSlash(args), api, extraOptions);
 
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
