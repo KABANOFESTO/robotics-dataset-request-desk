@@ -62,6 +62,7 @@ class Command(BaseCommand):
         seen_emails = set()
         created = 0
         skipped = 0
+        passwords_updated = 0
         generated_credentials = []
 
         for index, item in enumerate(users, start=1):
@@ -95,8 +96,18 @@ class Command(BaseCommand):
                         f"Entry {index} has a password that fails Django's password policy."
                     ) from exc
 
-            if User.objects.filter(email__iexact=email).exists():
-                skipped += 1
+            existing_user = User.objects.filter(email__iexact=email).first()
+            if existing_user:
+                if (
+                    settings.SEED_USERS_RESET_EXISTING_PASSWORDS
+                    and password
+                    and not existing_user.check_password(password)
+                ):
+                    existing_user.set_password(password)
+                    existing_user.save(update_fields=("password", "updated_at"))
+                    passwords_updated += 1
+                else:
+                    skipped += 1
                 continue
 
             if not password:
@@ -115,7 +126,9 @@ class Command(BaseCommand):
 
         self.stdout.write(
             self.style.SUCCESS(
-                f"Seed complete: {created} user(s) created, {skipped} existing user(s) kept."
+                f"Seed complete: {created} user(s) created, "
+                f"{passwords_updated} existing password(s) updated, "
+                f"{skipped} existing user(s) kept."
             )
         )
         if generated_credentials:
