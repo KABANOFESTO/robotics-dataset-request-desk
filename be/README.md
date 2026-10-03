@@ -29,7 +29,7 @@ Set the service root directory to `be`.
 python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn be.wsgi:application --bind 0.0.0.0:$PORT --workers 2
 ```
 
-Set `AUTO_SEED_USERS=true` in the backend environment to create missing users from `seed/users.json` during migrations. Existing accounts and passwords are preserved. The supplied reviewer passwords are weak and public; use them only for the demo. Set `SEED_USERS_ALLOW_WEAK_PASSWORDS=true` only for that disposable review deployment.
+Set `AUTO_SEED_USERS=true`
 
 ## Episode import
 
