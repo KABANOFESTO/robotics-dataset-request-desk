@@ -31,7 +31,9 @@ async function proxyApiRequest(
   });
 
   const responseHeaders = new Headers(upstream.headers);
-  for (const header of ["connection", "content-length", "keep-alive", "transfer-encoding", "upgrade"]) {
+  // fetch() may transparently decompress the upstream body. Do not forward
+  // encoding or length metadata that describes the original compressed body.
+  for (const header of ["connection", "content-encoding", "content-length", "keep-alive", "transfer-encoding", "upgrade"]) {
     responseHeaders.delete(header);
   }
 
