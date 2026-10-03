@@ -1,8 +1,9 @@
 Django==5.2.7
+dj-database-url==2.3.0
 djangorestframework==3.16.1
 djangorestframework-simplejwt==5.5.1
 django-cors-headers==4.9.0
+gunicorn==23.0.0
 psycopg[binary]==3.2.10
 python-dotenv==1.1.1
-pytest==8.4.2
-pytest-django==4.11.1
+whitenoise==6.9.0

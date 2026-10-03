@@ -1,0 +1,27 @@
+[
+  {
+    "email": "admin@example.com",
+    "role": "admin",
+    "name": "Ada Admin"
+  },
+  {
+    "email": "ops1@example.com",
+    "role": "operator",
+    "name": "Olu Operator"
+  },
+  {
+    "email": "ops2@example.com",
+    "role": "operator",
+    "name": "Odile Operator"
+  },
+  {
+    "email": "client-a@example.com",
+    "role": "client",
+    "name": "Acme Robotics"
+  },
+  {
+    "email": "client-b@example.com",
+    "role": "client",
+    "name": "Beta Labs"
+  }
+]

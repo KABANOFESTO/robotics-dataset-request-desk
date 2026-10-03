@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.sqlite3
 .env
+seed/users.json
 
 staticfiles/
 media/
@@ -10,3 +11,4 @@ media/
 .pytest_cache/
 .coverage
 htmlcov/
+coverage.xml
