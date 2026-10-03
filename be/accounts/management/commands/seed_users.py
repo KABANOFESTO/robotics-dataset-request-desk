@@ -87,7 +87,7 @@ class Command(BaseCommand):
                 raise CommandError(f"Duplicate email in seed file: {email}")
             seen_emails.add(email)
 
-            if not settings.DEBUG:
+            if not settings.DEBUG and not settings.SEED_USERS_ALLOW_WEAK_PASSWORDS:
                 try:
                     validate_password(password, user=User(email=email))
                 except ValidationError as exc:
